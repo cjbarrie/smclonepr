@@ -20,7 +20,10 @@ https://github.com/cjbarrie/smclonepr/assets/29574597/cc27e9a2-858e-4996-acb8-b2
 
 https://github.com/cjbarrie/smclonepr/assets/29574597/053f8d7f-0c0b-43e2-ad87-c6d54d6c0f69
 
-### Design
+### Simulation design
+
+In what follows, I describe the assumptions that informed the simulation of data, which we use to specify the estimand in the actual experiment. These are detailed below. The file `simulate_estimand.R` provides the R code needed to generate this data and conduct the analysis. 
+
 1. **Participants**: Simulated users with varying political orientations, ages, genders, and social media usage frequencies.
 2. **Tweets**: A set of 200 tweets, with equal numbers of left-wing and right-wing tweets.
 3. **Interactions**: Simulated interactions where each user is exposed to tweets and decides whether to click "Read more".
