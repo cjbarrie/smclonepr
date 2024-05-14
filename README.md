@@ -16,10 +16,9 @@ Users will be able to click on "Read more" 0 times or as many times as there are
 
 Posts only contain text--no other visual content. At the end, users are asked a series of simple demographic and attitudinal questions.
 
-https://github.com/cjbarrie/smclonepr/assets/29574597/d0effb8a-c672-4089-b94c-733f2206a2ae
+https://github.com/cjbarrie/smclonepr/assets/29574597/cc27e9a2-858e-4996-acb8-b25ddd68a53b
 
-https://github.com/cjbarrie/smclonepr/assets/29574597/4acec715-7f5d-47cc-a17d-2e3000acf828
-
+https://github.com/cjbarrie/smclonepr/assets/29574597/053f8d7f-0c0b-43e2-ad87-c6d54d6c0f69
 
 ### Design
 1. **Participants**: Simulated users with varying political orientations, ages, genders, and social media usage frequencies.
