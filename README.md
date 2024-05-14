@@ -16,7 +16,7 @@ Users will be able to click on "Read more" 0 times or as many times as there are
 
 Posts only contain text--no other visual content.
 
-[![Platform example](https://via.placeholder.com/150)](https://raw.githubusercontent.com/cjbarrie/smclonepr/main/plots/smclone.mp4)
+[![Platform example](https://raw.githubusercontent.com/cjbarrie/smclonepr/main/plots/smclone.mp4)](https://raw.githubusercontent.com/cjbarrie/smclonepr/main/plots/smclone.mp4)
 
 
 ### Design
