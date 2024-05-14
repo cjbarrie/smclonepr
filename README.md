@@ -16,6 +16,9 @@ Users will be able to click on "Read more" 0 times or as many times as there are
 
 Posts only contain text--no other visual content.
 
+[![Platform example](https://via.placeholder.com/150)](https://raw.githubusercontent.com/cjbarrie/smclonepr/main/plots/smclone.mp4)
+
+
 ### Design
 1. **Participants**: Simulated users with varying political orientations, ages, genders, and social media usage frequencies.
 2. **Tweets**: A set of 200 tweets, with equal numbers of left-wing and right-wing tweets.
