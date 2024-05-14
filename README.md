@@ -14,9 +14,10 @@ Our key metric of attention is clicking "Read more" on a tweet. In the actual ex
 
 Users will be able to click on "Read more" 0 times or as many times as there are tweets (here: 200). And each user will have 120 seconds to scroll through and interact with posts. 
 
-Posts only contain text--no other visual content.
+Posts only contain text--no other visual content. At the end, users are asked a series of simple demographic and attitudinal questions. 
 
-https://github.com/cjbarrie/smclonepr/assets/29574597/62059914-1997-498e-912e-da35a4bc2f2b
+https://github.com/cjbarrie/smclonepr/assets/29574597/e0384aaf-93d3-4917-a893-2a8347260132
+https://github.com/cjbarrie/smclonepr/assets/29574597/7d3d53d5-a41a-4ace-82b6-41cef6a3a56f
 
 
 ### Design
