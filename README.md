@@ -1,2 +1,2 @@
-# smclonest
-Repo for smclone registered report materials
+# smclonepr
+Repo for smclone pre-registration/registered report materials
