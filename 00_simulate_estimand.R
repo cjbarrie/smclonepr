@@ -210,7 +210,8 @@ plot <- ggplot(combined_coefs, aes(x = estimate, fill = term)) +
     legend.position = "none",
     panel.grid.major = element_line(color = "grey90"),
     panel.grid.minor = element_blank()
-  )
+  ) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red")
 
 # Print the plot
 print(plot)
