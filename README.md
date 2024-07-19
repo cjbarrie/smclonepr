@@ -35,12 +35,15 @@ In what follows, I describe the assumptions that informed the simulation of data
 
 2. **Tweet Generation**:
    - 200 tweets are generated, with 100 left-wing and 100 right-wing.
+   
+3. **Covariate additions**:
+   - Added a series of theoretically relevant covariates. Currently with no priors specified.
 
-3. **Simulating Interactions**:
+4. **Simulating Interactions**:
    - Each user is assigned a number of interactions based on a Poisson distribution with a mean of 5.
    - Users interact with tweets with probabilities influenced by their political orientation. In this initial example (priors TBD) extremes are more likely to engage with aligned tweets and less likely with opposing tweets.
 
-4. **Data Collection**:
+5. **Data Collection**:
    - The interaction data is collected, recording which tweets users click on.
    - A logistic regression model is used to estimate the effect of political orientation on the likelihood of interacting with conservative tweets.
 
@@ -67,4 +70,4 @@ The R script `simulate_estimand.R` includes:
 
 The distribution of simulated effect sizes can be seen below:
 
-![](plots/simulated_effect_sizes.png)
+![](plots/simulated_effect_sizes_all_covriates.png)
