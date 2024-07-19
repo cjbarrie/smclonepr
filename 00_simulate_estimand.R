@@ -4,6 +4,8 @@ library(broom)
 library(uuid)
 library(pbapply)
 
+# At the moment, simulation written so that only political ideology questions have some specified priors. All others covariates simulated as random. 
+
 # Set seed for reproducibility
 set.seed(123L)
 
@@ -18,6 +20,32 @@ n_iterations <- 100
 # Define custom probabilities for political orientation
 custom_probs <- c(0.1, 0.2, 0.4, 0.2, 0.1)
 
+# Define news media options and their biases
+news_media_options <- c("BBC News", "ITV News", "Sky News", 
+                        "Channel 4 News", "Daily Mail/Mail on Sunday", "Commercial radio news", 
+                        "Regional or local newspaper", "GB News", 
+                        "Guardian/Observer", "Metro", "Sun/Sun on Sunday", 
+                        "The Times/Sunday Times", "Al Jazeera", "Daily Telegraph/Sunday Telegraph", 
+                        "Channel 5 News", "CNN")
+
+news_media_bias <- c("Non-biased", "Non-biased", "Non-biased", 
+                     "Left-leaning", "Right-leaning", "Non-biased", 
+                     "Non-biased", "Right-leaning", 
+                     "Left-leaning", "Non-biased", "Right-leaning", 
+                     "Right-leaning", "Left-leaning", "Right-leaning", 
+                     "Non-biased", "Non-biased")
+
+# Create a data frame for the news sources and their biases
+news_sources <- tibble(
+  source = news_media_options,
+  bias = news_media_bias,
+  score = case_when(
+    news_media_bias == "Left-leaning" ~ -1,
+    news_media_bias == "Right-leaning" ~ 1,
+    TRUE ~ 0
+  )
+)
+
 # Function to run one iteration of the simulation and model estimation
 run_simulation <- function(iteration) {
   # Generate tweet IDs and their political orientation
@@ -31,7 +59,15 @@ run_simulation <- function(iteration) {
     session_id = replicate(n_users, UUIDgenerate()),
     age = sample(18:65, n_users, replace = TRUE),
     gender = sample(c("Male", "Female"), n_users, replace = TRUE),
-    social_media_frequency = sample(c("several times a week", "once a week", "once a month"), n_users, replace = TRUE),
+    social_media_use = sample(0:12, n_users, replace = TRUE),
+    party_id = sample(c("Conservative", "Labour"), n_users, replace = TRUE),
+    partyid_strength = sample(1:5, n_users, replace = TRUE), # 1 = not very strong, 5 = very strong
+    political_interest = sample(1:5, n_users, replace = TRUE), # 1 = not interested, 5 = very interested
+    income = sample(1:10, n_users, replace = TRUE), # 1 = lowest, 10 = highest
+    university_education = sample(c(0, 1), n_users, replace = TRUE), # 0 = no, 1 = yes
+    nonelec_participation = sample(0:10, n_users, replace = TRUE), # Number of non-electoral participation activities
+    social_endorsement = sample(0:1000, n_users, replace = TRUE), # Number of likes/retweets on a given tweet
+    exposure_to_diff_opinions = sample(1:5, n_users, replace = TRUE), # 1 = never, 5 = very often
     political_orientation_user = sample(1:5, n_users, replace = TRUE, prob = custom_probs)
   ) %>%
     mutate(
@@ -43,6 +79,20 @@ run_simulation <- function(iteration) {
       political_orientation_user = factor(political_orientation_user, levels = c(3, 1, 2, 4, 5)),
       n_interactions = rpois(n_users, lambda_interactions) # Number of interactions per user
     )
+  
+  # Simulate Likert scale responses for each news source
+  news_responses <- matrix(sample(1:5, n_users * length(news_media_options), replace = TRUE), ncol = length(news_media_options))
+  colnames(news_responses) <- news_media_options
+  news_responses <- as_tibble(news_responses)
+  users <- bind_cols(users, news_responses)
+  
+  # Calculate the news diversity score for each user
+  users <- users %>%
+    rowwise() %>%
+    mutate(
+      news_diet_diversity_score = sum(c_across(all_of(news_media_options)) * news_sources$score)
+    ) %>%
+    ungroup()
   
   # Simulate interactions
   interactions <- users %>%
@@ -98,16 +148,36 @@ run_simulation <- function(iteration) {
   
   # Fit logistic regression model
   model <- glm(
-    political_orientation_tweet_binary ~ age + gender + social_media_frequency + political_orientation_user,
+    political_orientation_tweet_binary ~ age + gender + social_media_use + party_id + partyid_strength + political_interest + news_diet_diversity_score + income + university_education + nonelec_participation + social_endorsement + exposure_to_diff_opinions + political_orientation_user,
     data = final_data,
     family = binomial
   )
   
-  # Extract coefficients for political_orientation_user4 and political_orientation_user5
+  # Extract coefficients for all covariates with readable names
   coefs <- tidy(model) %>%
-    filter(term %in% c("political_orientation_user1", "political_orientation_user2", 
-                       "political_orientation_user4", "political_orientation_user5")) %>%
-    select(term, estimate)
+    filter(term %in% c("age", "genderMale", "social_media_use", "party_idLabour", "party_idConservative",
+                       "partyid_strength", "political_interest", "news_diet_diversity_score", "income", "university_education", 
+                       "nonelec_participation", "social_endorsement", "exposure_to_diff_opinions",
+                       "political_orientation_user1", "political_orientation_user2", "political_orientation_user4", "political_orientation_user5")) %>%
+    select(term, estimate) %>%
+    mutate(term = recode(term,
+                         "age" = "Age",
+                         "genderMale" = "Gender: Male",
+                         "social_media_use" = "Social Media Use",
+                         "party_idLabour" = "Party ID: Labour",
+                         "party_idConservative" = "Party ID: Conservative",
+                         "partyid_strength" = "Party ID Strength",
+                         "political_interest" = "Political Interest",
+                         "news_diet_diversity_score" = "News Media Diversity Score",
+                         "income" = "Income",
+                         "university_education" = "University Education",
+                         "nonelec_participation" = "Non-Electoral Participation",
+                         "social_endorsement" = "Social Endorsement",
+                         "exposure_to_diff_opinions" = "Exposure to Different Opinions",
+                         "political_orientation_user1" = "Very Conservative",
+                         "political_orientation_user2" = "Somewhat Conservative",
+                         "political_orientation_user4" = "Somewhat Liberal",
+                         "political_orientation_user5" = "Very Liberal"))
   
   return(list(coefs = coefs, final_data = final_data))
 }
@@ -121,39 +191,16 @@ combined_coefs <- bind_rows(lapply(results, function(x) x$coefs), .id = "iterati
 # Combine all final data into a single data frame
 combined_final_data <- bind_rows(lapply(results, function(x) x$final_data), .id = "iteration")
 
-# Convert coefficients to a data frame
-coef_df <- combined_coefs %>%
-  mutate(term = factor(recode(term, 
-                              `political_orientation_user1` = "Very conservative",
-                              `political_orientation_user2` = "Somewhat conservative",
-                              `political_orientation_user4` = "Somewhat liberal",
-                              `political_orientation_user5` = "Very liberal"),
-                       levels = c("Somewhat liberal", "Very liberal", "Somewhat conservative", "Very conservative")))
-
-# Calculate mean effect size for each term
-mean_effects <- coef_df %>%
-  group_by(term) %>%
-  summarise(mean_estimate = mean(estimate))
-
-# Define common x-axis limits
-x_limits <- range(coef_df$estimate, na.rm = TRUE)
-
-# Plot the distribution of the estimated effect sizes as kernel density plots
-plot <- ggplot(coef_df, aes(x = estimate, fill = term)) +
+# Plot the distribution of the estimated effect sizes for all covariates with readable names
+plot <- ggplot(combined_coefs, aes(x = estimate, fill = term)) +
   geom_density(alpha = 0.5, color = "black") +
-  geom_vline(data = mean_effects, aes(xintercept = mean_estimate, color = term), linetype = "dotted", size = 1) +
-  geom_text(data = mean_effects, aes(x = mean_estimate, y = 0.1, label = round(mean_estimate, 3), color = term),
-            vjust = -0.5, hjust = 1.2, size = 3, show.legend = FALSE) +
-  facet_wrap(~ term, scales = "fixed") +
-  scale_x_continuous(limits = x_limits) +
+  facet_wrap(~ term, scales = "free") +
   scale_fill_grey(start = 0.6, end = 0.9) +
-  scale_color_grey(start = 0.2, end = 0.4) +
   labs(
-    title = "Distribution of estimated effect size by user ideology",
-    x = "Estimated coefficient",
+    title = "Distribution of Estimated Effect Size for All Covariates",
+    x = "Estimated Coefficient",
     y = "Density",
-    fill = "User political orientation",
-    color = "Mean"
+    fill = "Covariate"
   ) +
   theme_minimal(base_size = 14) +
   theme(
@@ -171,7 +218,7 @@ if (!dir.exists("plots")) {
 }
 
 # Save the plot to the plots directory
-ggsave("plots/simulated_effect_sizes.png", plot, width = 10, height = 6)
+ggsave("plots/simulated_effect_sizes_all_covariates.png", plot, width = 14, height = 8)
 
 # Ensure the plots directory exists
 if (!dir.exists("data/processed")) {
