@@ -70,4 +70,4 @@ The R script `simulate_estimand.R` includes:
 
 The distribution of simulated effect sizes can be seen below:
 
-![](plots/simulated_effect_sizes_all_covriates.png)
+![](plots/simulated_effect_sizes_all_covariates.png)
