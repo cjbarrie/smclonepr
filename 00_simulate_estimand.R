@@ -4,8 +4,6 @@ library(broom)
 library(uuid)
 library(pbapply)
 
-# At the moment, simulation written so that only political ideology questions have some specified priors. All others covariates simulated as random. 
-
 # Set seed for reproducibility
 set.seed(123L)
 
@@ -188,13 +186,18 @@ results <- pbreplicate(n_iterations, run_simulation(1), simplify = FALSE)
 # Combine coefficients into a single data frame
 combined_coefs <- bind_rows(lapply(results, function(x) x$coefs), .id = "iteration")
 
-# Combine all final data into a single data frame
-combined_final_data <- bind_rows(lapply(results, function(x) x$final_data), .id = "iteration")
+# Reorder the terms for plotting
+combined_coefs <- combined_coefs %>%
+  mutate(term = factor(term, levels = c("Very Conservative", "Somewhat Conservative", "Somewhat Liberal", "Very Liberal", 
+                                        "Age", "Gender: Male", "Social Media Use", "Party ID: Labour", "Party ID: Conservative", 
+                                        "Party ID Strength", "Political Interest", "News Media Diversity Score", 
+                                        "Income", "University Education", "Non-Electoral Participation", "Social Endorsement", 
+                                        "Exposure to Different Opinions")))
 
 # Plot the distribution of the estimated effect sizes for all covariates with readable names
 plot <- ggplot(combined_coefs, aes(x = estimate, fill = term)) +
   geom_density(alpha = 0.5, color = "black") +
-  facet_wrap(~ term, scales = "free") +
+  facet_wrap(~ term, scales = "free", ncol = 4) +
   scale_fill_grey(start = 0.6, end = 0.9) +
   labs(
     title = "Distribution of Estimated Effect Size for All Covariates",
